@@ -32,26 +32,26 @@ public class KanbanManager {
         return new ArrayList<>(epics.values());
     }
 
-    public int generateId() {
-        return id++;
+    public void createEpic(String name, String description) {
+        int nextId = generateId();
+        Epic epic = new Epic(nextId, name, description);
+        epics.put(epic.getId(), epic);
     }
-    public void addEpic(Epic epic) {
-        Epic newEpic = new Epic(epic.getId(),
-                epic.getName(),
-                epic.getDescription()
-        );
-        epics.put(newEpic.getId(), newEpic);
-    }
-    public void addSubTask(SubTask subTask) {
-        if (epics.containsKey(subTask.getEpicId())) {
-            subTasks.put(subTask.getId(), subTask);
+
+    public void createSubTask(String name, String description, String status, int epicId) {
+        if (epics.containsKey(epicId)) {
+            int nextId = generateId();
+            SubTask subTask = new SubTask(nextId, name, description, status, epicId);
+            subTasks.put(nextId, subTask);
             Epic parentEpic = findEpicById(subTask.getEpicId());
             parentEpic.linkSubTaskToEpic(subTask.getId());
             updateEpicStatus(parentEpic.getId());
         }
     }
 
-    public void addTask(Task task) {
+    public void createTask(String name, String description, String status) {
+        int nextId = generateId();
+        Task task = new Task(nextId, name, description, status);
         tasks.put(task.getId(), task);
     }
 
@@ -62,10 +62,7 @@ public class KanbanManager {
     public void updateEpic(Epic epic) {
         if (epics.containsKey(epic.getId())) {
             Epic oldVersion = findEpicById(epic.getId());
-            Epic newVersion = new Epic(oldVersion.getId(),
-                    epic.getName(),
-                    epic.getDescription(),
-                    oldVersion.getStatus(),
+            Epic newVersion = new Epic(oldVersion.getId(), epic.getName(), epic.getDescription(), oldVersion.getStatus().name(),
                     oldVersion.getSubTasksId());
             epics.put(newVersion.getId(), newVersion);
         }
@@ -73,14 +70,11 @@ public class KanbanManager {
 
     public void updateSubTask(SubTask subTask) {
         if (epics.containsKey(subTask.getEpicId()) && subTasks.containsKey(subTask.getId())) {
-            SubTask oldSubTask = findSubTaskById(subTask.getId());
-            SubTask newSubTask = new SubTask(oldSubTask.getId(),
-                    subTask.getName(),
-                    subTask.getDescription(),
-                    subTask.getStatus(),
-                    oldSubTask.getEpicId());
-            subTasks.put(newSubTask.getId(), newSubTask);
-            updateEpicStatus(newSubTask.getEpicId());
+            SubTask oldVersion = findSubTaskById(subTask.getId());
+            SubTask newVersion = new SubTask(oldVersion.getId(), subTask.getName(), subTask.getDescription(),
+                    subTask.getStatus().name(), oldVersion.getEpicId());
+            subTasks.put(newVersion.getId(), newVersion);
+            updateEpicStatus(newVersion.getEpicId());
         }
     }
 
@@ -139,35 +133,6 @@ public class KanbanManager {
         epics.clear();
     }
 
-    private void updateEpicStatus(int id) {
-       List<SubTask> epicSubTusks = getSubTaskListByEpicId(id);
-        List<Task> newSubTasks = new ArrayList<>();
-        List<Task> inProgressSubTasks = new ArrayList<>();
-        List<Task> doneSubTasks = new ArrayList<>();
-        for (Task subTask : epicSubTusks) {
-            switch (subTask.getStatus()) {
-                case NEW -> newSubTasks.add(subTask);
-                case IN_PROGRESS -> inProgressSubTasks.add(subTask);
-                case DONE -> doneSubTasks.add(subTask);
-            }
-        }
-        Task.TaskStatus epicStatus;
-        if (epicSubTusks.size() == doneSubTasks.size()) {
-            epicStatus = DONE;
-        } else if (doneSubTasks.isEmpty() && inProgressSubTasks.isEmpty()) {
-            epicStatus = NEW;
-        } else {
-            epicStatus = IN_PROGRESS;
-        }
-        Epic epic = findEpicById(id);
-        epic = new Epic(epic.getId(),
-                epic.getName(),
-                epic.getDescription(),
-                epicStatus,
-                epic.getSubTasksId());
-        epics.put(epic.getId(), epic);
-    }
-
     @Override
     public String toString() {
         StringBuilder result = new StringBuilder("Task list:\n");
@@ -184,5 +149,39 @@ public class KanbanManager {
             }
         }
         return result.toString();
+    }
+
+    private int generateId() {
+        return ++id;
+    }
+
+    private void updateEpicStatus(int id) {
+        List<SubTask> epicSubTusks = getSubTaskListByEpicId(id);
+        if (!epicSubTusks.isEmpty()) {
+            List<Task> inProgressSubTasks = new ArrayList<>();
+            List<Task> doneSubTasks = new ArrayList<>();
+            for (Task subTask : epicSubTusks) {
+                if (IN_PROGRESS == subTask.getStatus()) {
+                    inProgressSubTasks.add(subTask);
+                } else if (DONE == subTask.getStatus()) {
+                    doneSubTasks.add(subTask);
+                }
+            }
+            Task.TaskStatus epicStatus;
+            if (epicSubTusks.size() == doneSubTasks.size()) {
+                epicStatus = DONE;
+            } else if (doneSubTasks.isEmpty() && inProgressSubTasks.isEmpty()) {
+                epicStatus = NEW;
+            } else {
+                epicStatus = IN_PROGRESS;
+            }
+            Epic epic = findEpicById(id);
+            epic = new Epic(epic.getId(),
+                    epic.getName(),
+                    epic.getDescription(),
+                    epicStatus.name(),
+                    epic.getSubTasksId());
+            epics.put(epic.getId(), epic);
+        }
     }
 }

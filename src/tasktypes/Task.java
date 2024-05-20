@@ -8,13 +8,13 @@ public class Task {
     private final String name;
     private final String description;
 
-    public enum TaskStatus{
+    public enum TaskStatus {
         NEW, IN_PROGRESS, DONE
     }
 
-    public Task(int id, String name, String description, TaskStatus status) {
+    public Task(int id, String name, String description, String status) {
         this.id = id;
-        this.status = status;
+        this.status = Task.TaskStatus.valueOf(status);
         this.name = name;
         this.description = description;
     }
