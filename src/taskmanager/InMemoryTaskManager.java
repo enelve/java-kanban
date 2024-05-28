@@ -1,76 +1,79 @@
-import tasktypes.Epic;
-import tasktypes.SubTask;
-import tasktypes.Task;
+package taskmanager;
+
+import historymanager.HistoryManager;
+import tasktype.Epic;
+import tasktype.SubTask;
+import tasktype.Task;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import static tasktypes.Task.TaskStatus.*;
+import static tasktype.Task.TaskStatus.*;
 
-public class KanbanManager {
-    private int id;
+public class InMemoryTaskManager implements TaskManager {
+    protected int id;
     private final HashMap<Integer, Epic> epics;
     private final HashMap<Integer, SubTask> subTasks;
     private final HashMap<Integer, Task> tasks;
+    private final HistoryManager historyManager;
 
-    public KanbanManager() {
+    public InMemoryTaskManager(HistoryManager historyManager) {
+        this.historyManager = historyManager;
         this.epics = new HashMap<>();
         this.subTasks = new HashMap<>();
         this.tasks = new HashMap<>();
     }
 
-    public List<Task> getTaskList() {
-        return new ArrayList<>(tasks.values());
+    public HistoryManager getHistoryManager() {
+        return historyManager;
     }
 
-    public List<SubTask> getSubTaskList() {
-        return new ArrayList<>(subTasks.values());
-    }
-
-    public List<Epic> getEpicList() {
-        return new ArrayList<>(epics.values());
-    }
-
+    @Override
     public void createEpic(String name, String description) {
         int nextId = generateId();
         Epic epic = new Epic(nextId, name, description);
         epics.put(epic.getId(), epic);
     }
 
+    @Override
     public void createSubTask(String name, String description, String status, int epicId) {
         if (epics.containsKey(epicId)) {
             int nextId = generateId();
             SubTask subTask = new SubTask(nextId, name, description, status, epicId);
             subTasks.put(nextId, subTask);
-            Epic parentEpic = findEpicById(subTask.getEpicId());
+            Epic parentEpic = getEpic(subTask.getEpicId());
             parentEpic.linkSubTaskToEpic(subTask.getId());
             updateEpicStatus(parentEpic.getId());
         }
     }
 
+    @Override
     public void createTask(String name, String description, String status) {
         int nextId = generateId();
         Task task = new Task(nextId, name, description, status);
         tasks.put(task.getId(), task);
     }
 
+    @Override
     public void updateTask(Task task) {
         tasks.put(task.getId(), task);
     }
 
+    @Override
     public void updateEpic(Epic epic) {
         if (epics.containsKey(epic.getId())) {
-            Epic oldVersion = findEpicById(epic.getId());
+            Epic oldVersion = getEpic(epic.getId());
             Epic newVersion = new Epic(oldVersion.getId(), epic.getName(), epic.getDescription(), oldVersion.getStatus().name(),
                     oldVersion.getSubTasksId());
             epics.put(newVersion.getId(), newVersion);
         }
     }
 
+    @Override
     public void updateSubTask(SubTask subTask) {
         if (epics.containsKey(subTask.getEpicId()) && subTasks.containsKey(subTask.getId())) {
-            SubTask oldVersion = findSubTaskById(subTask.getId());
+            SubTask oldVersion = getSubTask(subTask.getId());
             SubTask newVersion = new SubTask(oldVersion.getId(), subTask.getName(), subTask.getDescription(),
                     subTask.getStatus().name(), oldVersion.getEpicId());
             subTasks.put(newVersion.getId(), newVersion);
@@ -78,59 +81,51 @@ public class KanbanManager {
         }
     }
 
-    public List<SubTask> getSubTaskListByEpicId(int id) {
-        ArrayList<SubTask> subTasksByEpic = new ArrayList<>();
-        for (int subTaskId : epics.get(id).getSubTasksId()) {
-            SubTask subTask = findSubTaskById(subTaskId);
-            subTasksByEpic.add(subTask);
-        }
-        return subTasksByEpic;
+    @Override
+    public Task getTask(int id) {
+        Task task = tasks.get(id);
+        historyManager.add(task);
+        return task;
     }
 
-    public Task findTaskById(int id) {
-        return tasks.get(id);
+    @Override
+    public SubTask getSubTask(int id) {
+        SubTask task = subTasks.get(id);
+        historyManager.add(task);
+        return task;
     }
 
-    public SubTask findSubTaskById(int id) {
-        return subTasks.get(id);
+    @Override
+    public Epic getEpic(int id) {
+        Epic task = epics.get(id);
+        historyManager.add(task);
+        return task;
     }
 
-    public Epic findEpicById(int id) {
-        return epics.get(id);
-    }
-
-    public void removeTaskById(int id) {
+    @Override
+    public void removeTask(int id) {
         tasks.remove(id);
     }
 
-    public void removeSubTaskById(int id) {
-        Epic epic = findEpicById(findSubTaskById(id).getEpicId());
+    @Override
+    public void removeSubTask(int id) {
+        Epic epic = getEpic(getSubTask(id).getEpicId());
         epic.unlinkSubTaskFromEpic(id);
         updateEpicStatus(epic.getId());
         subTasks.remove(id);
     }
 
-    public void removeEpicById(int id) {
+    @Override
+    public void removeEpic(int id) {
         for (int subTaskId : epics.get(id).getSubTasksId()) {
             subTasks.remove(subTaskId);
         }
         epics.remove(id);
     }
 
-    public void clearTasks() {
-        tasks.clear();
-    }
-
-    public void clearSubTasks() {
-        for (SubTask subTask : subTasks.values()) {
-            removeSubTaskById(subTask.getId());
-        }
-
-    }
-
-    public void clearEpics() {
-        clearSubTasks();
-        epics.clear();
+    @Override
+    public List<Task> getHistory() {
+        return historyManager.getHistory();
     }
 
     @Override
@@ -151,12 +146,49 @@ public class KanbanManager {
         return result.toString();
     }
 
+    public List<Task> getTasks() {
+        return new ArrayList<>(tasks.values());
+    }
+
+    public List<SubTask> getSubTasks() {
+        return new ArrayList<>(subTasks.values());
+    }
+
+    public List<Epic> getEpics() {
+        return new ArrayList<>(epics.values());
+    }
+
+    public List<SubTask> getEpicSubtasks(int id) {
+        ArrayList<SubTask> subTasksByEpic = new ArrayList<>();
+        for (int subTaskId : epics.get(id).getSubTasksId()) {
+            SubTask subTask = getSubTask(subTaskId);
+            subTasksByEpic.add(subTask);
+        }
+        return subTasksByEpic;
+    }
+
+    public void clearTasks() {
+        tasks.clear();
+    }
+
+    public void clearSubTasks() {
+        for (SubTask subTask : subTasks.values()) {
+            removeSubTask(subTask.getId());
+        }
+
+    }
+
+    public void clearEpics() {
+        clearSubTasks();
+        epics.clear();
+    }
+
     private int generateId() {
         return ++id;
     }
 
     private void updateEpicStatus(int id) {
-        List<SubTask> epicSubTusks = getSubTaskListByEpicId(id);
+        List<SubTask> epicSubTusks = getEpicSubtasks(id);
         if (!epicSubTusks.isEmpty()) {
             List<Task> inProgressSubTasks = new ArrayList<>();
             List<Task> doneSubTasks = new ArrayList<>();
@@ -175,7 +207,7 @@ public class KanbanManager {
             } else {
                 epicStatus = IN_PROGRESS;
             }
-            Epic epic = findEpicById(id);
+            Epic epic = getEpic(id);
             epic = new Epic(epic.getId(),
                     epic.getName(),
                     epic.getDescription(),
