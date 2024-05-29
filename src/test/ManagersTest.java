@@ -10,7 +10,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ManagersTest {
 
-    @Test
     @RepeatedTest(10)
      void defaultManagersInitializedProperly() {
         assertTrue(Managers.getDefault() instanceof InMemoryTaskManager);
