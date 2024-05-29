@@ -2,9 +2,11 @@ package historymanager;
 
 import tasktype.Task;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class InMemoryHistoryManager extends AbstractHistoryTaskManager implements HistoryManager {
+public class InMemoryHistoryManager implements HistoryManager {
+    final List<Task> taskHistoryList = new ArrayList<>();
     private static final int TASK_HISTORY_DEPTH = 10;
 
     @Override
