@@ -33,11 +33,17 @@ public interface TaskManager {
 
     List<Task> getHistory();
 
-    public List<Task> getTasks();
+    List<Task> getTasks();
 
-    public List<SubTask> getSubTasks();
+    List<SubTask> getSubTasks();
 
-    public List<Epic> getEpics();
+    List<Epic> getEpics();
 
-    public List<SubTask> getEpicSubtasks(int id);
+    List<SubTask> getEpicSubtasks(int id);
+
+    void clearTasks();
+
+    void clearSubTasks();
+
+    void clearEpics();
 }
