@@ -1,6 +1,5 @@
-package test;
+package historymanager;
 
-import historymanager.InMemoryHistoryManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import tasktype.Task;
@@ -10,7 +9,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class InMemoryHistoryManagerTest {
+class InMemoryHistoryManagerTest {
     InMemoryHistoryManager historyManager;
 
     @BeforeEach
@@ -20,13 +19,13 @@ public class InMemoryHistoryManagerTest {
 
     @Test
     void newTaskAdded() {
-        Task task = new Task(1, "Name", "Desciption", "NEW");
-        historyManager.add(task);
-        Task expectedTask = historyManager.getHistory().get(0);
-        assertEquals(historyManager.getHistory().size(), 1);
-        assertEquals(expectedTask.getName(), "Name");
-        assertEquals(expectedTask.getDescription(), "Desciption");
-        assertEquals(expectedTask.getStatus(), Task.TaskStatus.NEW);
+        Task expectedTask = new Task(1, "Name", "Desciption", "NEW");
+        historyManager.add(expectedTask);
+        Task actualTask = historyManager.getHistory().get(0);
+        assertEquals(1, historyManager.getHistory().size());
+        assertEquals("Name", actualTask.getName());
+        assertEquals("Desciption", actualTask.getDescription());
+        assertEquals(Task.TaskStatus.NEW, actualTask.getStatus());
     }
 
     @Test
@@ -35,7 +34,7 @@ public class InMemoryHistoryManagerTest {
         historyManager.add(task);
         historyManager.add(task);
 
-        assertEquals(historyManager.getHistory().size(), 1);
+        assertEquals(1, historyManager.getHistory().size());
     }
 
     @Test
@@ -56,6 +55,6 @@ public class InMemoryHistoryManagerTest {
         historyManager.add(task1);
 
         List<Task> history = historyManager.getHistory();
-        assertEquals(history.get(history.size() - 1).getId(), 1);
+        assertEquals(1, history.get(history.size() - 1).getId());
     }
 }

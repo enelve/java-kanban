@@ -1,14 +1,10 @@
-package test;
+package taskmanager;
 
 import org.junit.jupiter.api.RepeatedTest;
 
-import org.junit.jupiter.api.Test;
-import taskmanager.InMemoryTaskManager;
-import taskmanager.Managers;
-
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class ManagersTest {
+class ManagersTest {
 
     @RepeatedTest(10)
      void defaultManagersInitializedProperly() {
