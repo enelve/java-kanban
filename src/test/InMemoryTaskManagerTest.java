@@ -99,12 +99,12 @@ public class InMemoryTaskManagerTest {
     }
 
     @Test
-    void historyStoresTenTasksOnly() {
+    void historyDoesNotStoreDuplicates() {
         taskManager.createTask("Test", "Test", "DONE");
         for (int i = 1; i < 100; i++) {
             taskManager.getTask(1);
         }
-        assertEquals(10, taskManager.getHistory().size());
+        assertEquals(1, taskManager.getHistory().size());
     }
 
     @Test
@@ -117,5 +117,15 @@ public class InMemoryTaskManagerTest {
             idSet.add(epic.getId());
         }
         assertEquals(taskManager.getEpics().size(), idSet.size());
+    }
+
+    @Test
+    void epicAndCorrespondingSubtasksNotShowmInHistoryAfterDeletion() {
+        taskManager.createEpic("EpicName", "EpicDescription");
+        taskManager.createSubTask("SubTaskName", "SubTaskDescription", "NEW", 1);
+        assertEquals(taskManager.getHistory().size(),2);
+
+        taskManager.removeEpic(1);
+        assertEquals(taskManager.getHistory().size(),0);
     }
 }
