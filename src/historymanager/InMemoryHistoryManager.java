@@ -2,7 +2,9 @@ package historymanager;
 
 import tasktype.Task;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 public class InMemoryHistoryManager implements HistoryManager {
     private final HashMap<Integer, Node<Task>> taskHistoryMap = new HashMap<>();

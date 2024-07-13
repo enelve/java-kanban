@@ -9,7 +9,15 @@ public class Main {
         manager.createEpic("Epic1", "Description");
         manager.createTask("Task1", "Description", "NEW");
         manager.createSubTask("SubTask1", "Description", "NEW", 1);
+        manager.createTask("Task2", "Description", "NEW");
+        manager.createEpic("Epic2", "Description");
+        manager.createSubTask("SubTask2", "Description", "NEW", 1);
+
+        manager.getTask(4);
+        manager.getEpic(5);
+        manager.getTask(4);
         manager.getTask(2);
+        manager.getSubTask(6);
         printAllTasks(manager);
     }
 
