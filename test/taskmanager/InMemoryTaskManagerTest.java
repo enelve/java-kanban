@@ -1,9 +1,8 @@
-package test;
+package taskmanager;
 
 import historymanager.InMemoryHistoryManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import taskmanager.InMemoryTaskManager;
 import tasktype.Epic;
 import tasktype.SubTask;
 import tasktype.Task;
@@ -13,8 +12,9 @@ import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static tasktype.Task.TaskStatus.NEW;
 
-public class InMemoryTaskManagerTest {
+class InMemoryTaskManagerTest {
     InMemoryTaskManager taskManager;
 
     @BeforeEach
@@ -56,10 +56,10 @@ public class InMemoryTaskManagerTest {
         taskManager.createTask("TestName", "TestDescription", "NEW");
         Task task = taskManager.getTask(1);
         assertNotNull(task);
-        assertEquals(task.getId(), 1);
-        assertEquals(task.getName(), "TestName");
-        assertEquals(task.getDescription(), "TestDescription");
-        assertEquals(task.getStatus(), Task.TaskStatus.NEW);
+        assertEquals(1, task.getId());
+        assertEquals("TestName", task.getName());
+        assertEquals("TestDescription", task.getDescription());
+        assertEquals(NEW, task.getStatus());
     }
 
     @Test
@@ -68,10 +68,10 @@ public class InMemoryTaskManagerTest {
         taskManager.createSubTask("SubTaskName", "SubTaskDescription", "NEW", 1);
         SubTask subTask = taskManager.getSubTask(2);
         assertNotNull(subTask);
-        assertEquals(subTask.getId(), 2);
-        assertEquals(subTask.getName(), "SubTaskName");
-        assertEquals(subTask.getDescription(), "SubTaskDescription");
-        assertEquals(subTask.getStatus(), Task.TaskStatus.NEW);
+        assertEquals(2, subTask.getId());
+        assertEquals("SubTaskName", subTask.getName());
+        assertEquals("SubTaskDescription", subTask.getDescription());
+        assertEquals(NEW, subTask.getStatus());
     }
 
     @Test
@@ -79,10 +79,10 @@ public class InMemoryTaskManagerTest {
         taskManager.createEpic("EpicName", "EpicDescription");
         Epic epic = taskManager.getEpic(1);
         assertNotNull(epic);
-        assertEquals(epic.getId(), 1);
-        assertEquals(epic.getName(), "EpicName");
-        assertEquals(epic.getDescription(), "EpicDescription");
-        assertEquals(epic.getStatus(), Task.TaskStatus.NEW);
+        assertEquals(1, epic.getId());
+        assertEquals("EpicName", epic.getName());
+        assertEquals("EpicDescription", epic.getDescription());
+        assertEquals(NEW, epic.getStatus());
     }
 
     @Test
@@ -99,12 +99,12 @@ public class InMemoryTaskManagerTest {
     }
 
     @Test
-    void historyStoresTenTasksOnly() {
+    void historyDoesNotStoreDuplicates() {
         taskManager.createTask("Test", "Test", "DONE");
         for (int i = 1; i < 100; i++) {
             taskManager.getTask(1);
         }
-        assertEquals(10, taskManager.getHistory().size());
+        assertEquals(1, taskManager.getHistory().size());
     }
 
     @Test
@@ -117,5 +117,15 @@ public class InMemoryTaskManagerTest {
             idSet.add(epic.getId());
         }
         assertEquals(taskManager.getEpics().size(), idSet.size());
+    }
+
+    @Test
+    void epicAndCorrespondingSubtasksNotShowmInHistoryAfterDeletion() {
+        taskManager.createEpic("EpicName", "EpicDescription");
+        taskManager.createSubTask("SubTaskName", "SubTaskDescription", "NEW", 1);
+        assertEquals(2, taskManager.getHistory().size());
+
+        taskManager.removeEpic(1);
+        assertEquals(0, taskManager.getHistory().size());
     }
 }
