@@ -1,10 +1,12 @@
 package tasktype;
 
+import static tasktype.Task.TaskType.SUBTASK;
+
 public class SubTask extends Task {
     private final int epicId;
 
     public SubTask(int id, String name, String description, String status, int epicId) {
-        super(id, name, description, status);
+        super(id, name, description, status, SUBTASK);
         this.epicId = epicId;
     }
 
@@ -14,6 +16,6 @@ public class SubTask extends Task {
 
     @Override
     public String toString() {
-        return super.toString() + ", model.Epic id=" + epicId;
+        return super.toString() + epicId;
     }
 }

@@ -24,8 +24,8 @@ class InMemoryTaskManagerTest {
 
     @Test
     void tasksEqualWhenIdSame() {
-        Task task1 = new Task(1, "Test", "Test", "NEW");
-        Task task2 = new Task(1, "Test2", "Test2", "DONE");
+        Task task1 = new Task(1, "Test", "Test", "NEW", Task.TaskType.TASK);
+        Task task2 = new Task(1, "Test2", "Test2", "DONE", Task.TaskType.TASK);
         assertEquals(task1, task2);
     }
 
@@ -123,6 +123,8 @@ class InMemoryTaskManagerTest {
     void epicAndCorrespondingSubtasksNotShowmInHistoryAfterDeletion() {
         taskManager.createEpic("EpicName", "EpicDescription");
         taskManager.createSubTask("SubTaskName", "SubTaskDescription", "NEW", 1);
+        taskManager.getEpic(1);
+        taskManager.getSubTask(2);
         assertEquals(2, taskManager.getHistory().size());
 
         taskManager.removeEpic(1);
