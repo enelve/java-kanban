@@ -224,7 +224,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     private void save() {
         try (Writer fileWriter = new FileWriter(file)) {
-            String header = "id,type,name,status,description,epic";
+            String header = "id,type,name,status,description,start time,duration,end time, epic,";
             String nextLine = "\n";
             fileWriter.write(header + nextLine);
             List<Task> taskList = new LinkedList<>();

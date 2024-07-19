@@ -2,7 +2,10 @@ package tasktype;
 
 import exception.TaskParsingFromStringException;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.Optional;
 
 public class Task {
     private final int id;
@@ -10,6 +13,8 @@ public class Task {
     private final String name;
     private final String description;
     private final TaskType taskType;
+    private final Duration duration;
+    private final LocalDateTime startTime;
 
     public enum TaskStatus {
         NEW, IN_PROGRESS, DONE
@@ -19,12 +24,25 @@ public class Task {
         TASK, SUBTASK, EPIC;
     }
 
+    public Task(int id, String name, String description, String status, TaskType taskType, LocalDateTime startTime,
+                Duration duration) {
+        this.id = id;
+        this.status = Task.TaskStatus.valueOf(status);
+        this.name = name;
+        this.description = description;
+        this.taskType = taskType;
+        this.startTime = startTime;
+        this.duration = duration;
+    }
+
     public Task(int id, String name, String description, String status, TaskType taskType) {
         this.id = id;
         this.status = Task.TaskStatus.valueOf(status);
         this.name = name;
         this.description = description;
         this.taskType = taskType;
+        this.startTime = null;
+        this.duration = null;
     }
 
     public int getId() {
@@ -47,11 +65,20 @@ public class Task {
         return taskType;
     }
 
+    public Duration getDuration() {
+        return duration;
+    }
+
+    public LocalDateTime getStartTime() {
+        return startTime;
+    }
+
     public static Task fromString(String value) {
+
         String[] split = value.split(",", -1);
         if (split.length == 0) {
             return null;
-        } else if (split.length < 6) {
+        } else if (split.length < 8) {
             throw new TaskParsingFromStringException("Недостаточно данных для загрузки списка задач");
         }
         int id = Integer.parseInt(split[0]);
@@ -59,18 +86,29 @@ public class Task {
         String name = split[2];
         String status = split[3];
         String description = split[4];
+        LocalDateTime startTime = (!split[5].isEmpty()) ? LocalDateTime.parse(split[5]) : null;
+        Duration duration = Duration.ofMinutes(Long.parseLong(split[6]));
 
         switch (taskType) {
             case TASK:
-                return new Task(id, name, description, status, taskType);
+                return new Task(id, name, description, status, taskType, startTime, duration);
             case EPIC:
-                return new Epic(id, name, description, status);
+                LocalDateTime endTime = (!split[7].isEmpty()) ? LocalDateTime.parse(split[7]) : null;
+                return new Epic(id, name, description, status, startTime, duration, endTime);
             case SUBTASK:
-                int epic = Integer.parseInt(split[5]);
-                return new SubTask(id, name, description, status, epic);
+                int epic = Integer.parseInt(split[8]);
+                return new SubTask(id, name, description, status, startTime, duration, epic);
             default:
                 throw new TaskParsingFromStringException("Неизвестный тип задачи");
         }
+    }
+
+    public LocalDateTime getEndTime() {
+        LocalDateTime result = null;
+        if (startTime != null && duration != null) {
+            result = startTime.plus(duration);
+        }
+        return result;
     }
 
     @Override
@@ -87,6 +125,8 @@ public class Task {
 
     @Override
     public String toString() {
-        return String.format("%d,%s,%s,%s,%s,", id, taskType, name, status, description);
+        return String.format("%d,%s,%s,%s,%s,%s,%d,,", id, taskType, name, status, description,
+                Optional.ofNullable(this.getStartTime()).map(LocalDateTime::toString).orElse(""),
+                Optional.ofNullable(duration).map(Duration::toMinutes).orElse(0L));
     }
 }
