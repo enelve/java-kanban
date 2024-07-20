@@ -5,19 +5,20 @@ import tasktype.SubTask;
 import tasktype.Task;
 
 import java.util.List;
+import java.util.Set;
 
 public interface TaskManager {
-    void createEpic(String name, String description);
+    boolean createEpic(String name, String description);
 
-    void createSubTask(String name, String description, String status, int epicId);
+    boolean createSubTask(String name, String description, String status, int epicId);
 
-    void createTask(String name, String description, String status);
+    boolean createTask(String name, String description, String status);
 
-    void updateEpic(Epic epic);
+    boolean updateEpic(Epic epic);
 
-    void updateTask(Task task);
+    boolean updateTask(Task task);
 
-    void updateSubTask(SubTask subTask);
+    boolean updateSubTask(SubTask subTask);
 
     Task getTask(int id);
 
@@ -46,4 +47,6 @@ public interface TaskManager {
     void clearSubTasks();
 
     void clearEpics();
+
+    Set<Task> getPrioritizedTasks();
 }

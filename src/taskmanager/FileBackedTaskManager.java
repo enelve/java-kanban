@@ -109,39 +109,45 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     @Override
-    public void createEpic(String name, String description) {
-        super.createEpic(name, description);
+    public boolean createEpic(String name, String description) {
+        boolean hasTimeConfict = super.createEpic(name, description);
         save();
+        return hasTimeConfict;
     }
 
     @Override
-    public void createSubTask(String name, String description, String status, int epicId) {
-        super.createSubTask(name, description, status, epicId);
+    public boolean createSubTask(String name, String description, String status, int epicId) {
+        boolean hasTimeConfict = super.createSubTask(name, description, status, epicId);
         save();
+        return hasTimeConfict;
     }
 
     @Override
-    public void createTask(String name, String description, String status) {
-        super.createTask(name, description, status);
+    public boolean createTask(String name, String description, String status) {
+        boolean hasTimeConfict = super.createTask(name, description, status);
         save();
+        return hasTimeConfict;
     }
 
     @Override
-    public void updateEpic(Epic epic) {
-        super.updateEpic(epic);
+    public boolean updateEpic(Epic epic) {
+        boolean hasTimeConfict = super.updateEpic(epic);
         save();
+        return hasTimeConfict;
     }
 
     @Override
-    public void updateTask(Task task) {
-        super.updateTask(task);
+    public boolean updateTask(Task task) {
+        boolean hasTimeConfict = super.updateTask(task);
         save();
+        return hasTimeConfict;
     }
 
     @Override
-    public void updateSubTask(SubTask subTask) {
-        super.updateSubTask(subTask);
+    public boolean updateSubTask(SubTask subTask) {
+        boolean hasTimeConfict = super.updateSubTask(subTask);
         save();
+        return hasTimeConfict;
     }
 
     @Override
