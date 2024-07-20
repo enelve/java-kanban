@@ -3,9 +3,9 @@ package taskmanager;
 import exception.ManagerSaveException;
 import exception.TaskParsingFromStringException;
 import historymanager.HistoryManager;
-import tasktype.Epic;
-import tasktype.SubTask;
-import tasktype.Task;
+import task.Epic;
+import task.SubTask;
+import task.Task;
 
 import java.io.*;
 import java.util.*;
@@ -233,10 +233,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             String header = "id,type,name,status,description,start time,duration,end time, epic,";
             String nextLine = "\n";
             fileWriter.write(header + nextLine);
-            List<Task> taskList = new LinkedList<>();
-            taskList.addAll(super.getTasks());
-            taskList.addAll(super.getEpics());
-            taskList.addAll(super.getSubTasks());
+            List<Task> taskList = super.getAll();
             for (Task task : taskList) {
                 fileWriter.write(task.toString() + nextLine);
             }

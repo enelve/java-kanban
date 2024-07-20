@@ -3,16 +3,16 @@ package taskmanager;
 import historymanager.InMemoryHistoryManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import tasktype.Epic;
-import tasktype.SubTask;
-import tasktype.Task;
+import task.Epic;
+import task.SubTask;
+import task.Task;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static tasktype.Task.TaskStatus.NEW;
+import static task.Task.TaskStatus.NEW;
 
 class InMemoryTaskManagerTest {
     InMemoryTaskManager taskManager;

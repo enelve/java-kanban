@@ -1,8 +1,8 @@
 package taskmanager;
 
-import tasktype.Epic;
-import tasktype.SubTask;
-import tasktype.Task;
+import task.Epic;
+import task.SubTask;
+import task.Task;
 
 import java.util.List;
 import java.util.Set;
@@ -39,6 +39,8 @@ public interface TaskManager {
     List<SubTask> getSubTasks();
 
     List<Epic> getEpics();
+
+    List<Task> getAll();
 
     List<SubTask> getEpicSubtasks(int id);
 

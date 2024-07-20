@@ -1,4 +1,4 @@
-package tasktype;
+package task;
 
 import exception.TaskParsingFromStringException;
 

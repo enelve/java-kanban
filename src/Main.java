@@ -1,6 +1,6 @@
 import taskmanager.Managers;
 import taskmanager.TaskManager;
-import tasktype.Task;
+import task.Task;
 
 public class Main {
 

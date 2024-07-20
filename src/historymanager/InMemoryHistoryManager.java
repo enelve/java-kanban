@@ -1,6 +1,6 @@
 package historymanager;
 
-import tasktype.Task;
+import task.Task;
 
 import java.util.ArrayList;
 import java.util.HashMap;

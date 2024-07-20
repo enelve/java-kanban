@@ -2,13 +2,13 @@ package historymanager;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import tasktype.Task;
+import task.Task;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static tasktype.Task.TaskType.TASK;
+import static task.Task.TaskType.TASK;
 
 class InMemoryHistoryManagerTest {
     InMemoryHistoryManager historyManager;

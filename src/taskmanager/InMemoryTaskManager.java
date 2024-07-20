@@ -1,16 +1,17 @@
 package taskmanager;
 
 import historymanager.HistoryManager;
-import tasktype.Epic;
-import tasktype.SubTask;
-import tasktype.Task;
+import task.Epic;
+import task.SubTask;
+import task.Task;
+import task.TaskDate;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
 
-import static tasktype.Task.TaskStatus.*;
-import static tasktype.Task.TaskType.TASK;
+import static task.Task.TaskStatus.*;
+import static task.Task.TaskType.TASK;
 
 public class InMemoryTaskManager implements TaskManager {
     protected int id;
@@ -177,6 +178,15 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
+    public List<Task> getAll() {
+        List<Task> result = new ArrayList<>();
+        result.addAll(getTasks());
+        result.addAll(getEpics());
+        result.addAll(getSubTasks());
+        return result;
+    }
+
+    @Override
     public List<SubTask> getEpicSubtasks(int id) {
         ArrayList<SubTask> subTasksByEpic = new ArrayList<>();
         for (int subTaskId : epics.get(id).getSubTasksId()) {
@@ -207,9 +217,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public Set<Task> getPrioritizedTasks() {
         Set<Task> result = new TreeSet<>(Comparator.comparing(Task::getStartTime));
-        result.addAll(getTasks().stream().filter(task -> task.getStartTime() != null).toList());
-        result.addAll(getEpics().stream().filter(task -> task.getStartTime() != null).toList());
-        result.addAll(getSubTasks().stream().filter(task -> task.getStartTime() != null).toList());
+        result.addAll(getAll().stream().filter(task -> task.getStartTime() != null).toList());
         return result;
     }
 
@@ -273,7 +281,7 @@ public class InMemoryTaskManager implements TaskManager {
                     .stream()
                     .anyMatch(existingTask ->
                             task.getStartTime().isBefore(existingTask.getEndTime())
-                                    && task.getStartTime().isAfter(existingTask.getStartTime()));
+                                    && task.getEndTime().isAfter(existingTask.getStartTime()));
         }
         return false;
     }

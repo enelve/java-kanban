@@ -1,9 +1,9 @@
-package tasktype;
+package task;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 
-import static tasktype.Task.TaskType.SUBTASK;
+import static task.Task.TaskType.SUBTASK;
 
 public class SubTask extends Task {
     private final int epicId;
