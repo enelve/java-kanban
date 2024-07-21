@@ -54,8 +54,7 @@ public class Epic extends Task {
     @Override
     public String toString() {
         String parentString = super.toString();
-        return parentString.substring(0, parentString.length()-2) + "," +
-                Optional.ofNullable(this.getStartTime()).map(LocalDateTime::toString).orElse("")
-                + ',';
+        return parentString.substring(0, parentString.length() - 2) + "," +
+                Optional.ofNullable(this.getStartTime()).map(LocalDateTime::toString).orElse("") + ',';
     }
 }

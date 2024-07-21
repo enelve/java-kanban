@@ -32,19 +32,19 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public boolean createEpic(String name, String description) {
+    public void createEpic(String name, String description) {
         int nextId = generateId();
         Epic epic = new Epic(nextId, name, description);
         epics.put(epic.getId(), epic);
-        return hasTimeConfict(epic);
     }
 
     @Override
-    public boolean createSubTask(String name, String description, String status, int epicId) {
+    public boolean createSubTask(String name, String description, String status, LocalDateTime startTime,
+                                 Duration duration, int epicId) {
         SubTask subTask = null;
         if (epics.containsKey(epicId)) {
             int nextId = generateId();
-            subTask = new SubTask(nextId, name, description, status, epicId);
+            subTask = new SubTask(nextId, name, description, status, startTime, duration, epicId);
             subTasks.put(nextId, subTask);
             Epic parentEpic = epics.get(subTask.getEpicId());
             parentEpic.linkSubTaskToEpic(subTask.getId());
@@ -54,9 +54,9 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public boolean createTask(String name, String description, String status) {
+    public boolean createTask(String name, String description, String status, LocalDateTime startTime, Duration duration) {
         int nextId = generateId();
-        Task task = new Task(nextId, name, description, status, TASK);
+        Task task = new Task(nextId, name, description, status, TASK, startTime, duration);
         tasks.put(task.getId(), task);
         return hasTimeConfict(task);
     }
@@ -68,7 +68,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public boolean updateEpic(Epic epic) {
+    public void updateEpic(Epic epic) {
         Epic newVersion = null;
         if (epics.containsKey(epic.getId())) {
             Epic oldVersion = getEpic(epic.getId());
@@ -77,7 +77,6 @@ public class InMemoryTaskManager implements TaskManager {
                     oldVersion.getDuration(), oldVersion.getEndTime());
             epics.put(newVersion.getId(), newVersion);
         }
-        return hasTimeConfict(newVersion);
     }
 
     @Override
@@ -188,12 +187,9 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public List<SubTask> getEpicSubtasks(int id) {
-        ArrayList<SubTask> subTasksByEpic = new ArrayList<>();
-        for (int subTaskId : epics.get(id).getSubTasksId()) {
-            SubTask subTask = subTasks.get(subTaskId);
-            subTasksByEpic.add(subTask);
-        }
-        return subTasksByEpic;
+        return epics.get(id).getSubTasksId()
+                .stream().map(subTasks::get)
+                .toList();
     }
 
     @Override
@@ -217,7 +213,8 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public Set<Task> getPrioritizedTasks() {
         Set<Task> result = new TreeSet<>(Comparator.comparing(Task::getStartTime));
-        result.addAll(getAll().stream().filter(task -> task.getStartTime() != null).toList());
+        result.addAll(getTasks().stream().filter(task -> task.getStartTime() != null).toList());
+        result.addAll(getSubTasks().stream().filter(task -> task.getStartTime() != null).toList());
         return result;
     }
 
@@ -276,13 +273,14 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     private boolean hasTimeConfict(Task task) {
-        if (task != null) {
-            return getPrioritizedTasks()
-                    .stream()
-                    .anyMatch(existingTask ->
-                            task.getStartTime().isBefore(existingTask.getEndTime())
-                                    && task.getEndTime().isAfter(existingTask.getStartTime()));
+        if (task != null && task.getEndTime() != null && task.getStartTime() != null) {
+            return getPrioritizedTasks().stream()
+                    .filter(prioritizedTask -> prioritizedTask.getId() != task.getId())
+                    .anyMatch(prioritizedTask -> task.getStartTime().isBefore(prioritizedTask.getEndTime())
+                            && task.getEndTime().isAfter(prioritizedTask.getStartTime()));
+        } else {
+            return false;
         }
-        return false;
     }
 }
+

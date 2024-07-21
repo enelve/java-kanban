@@ -4,17 +4,20 @@ import task.Epic;
 import task.SubTask;
 import task.Task;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
 public interface TaskManager {
-    boolean createEpic(String name, String description);
+    void createEpic(String name, String description);
 
-    boolean createSubTask(String name, String description, String status, int epicId);
+    boolean createSubTask(String name, String description, String status, LocalDateTime startTime,
+                          Duration duration, int epicId);
 
-    boolean createTask(String name, String description, String status);
+    boolean createTask(String name, String description, String status, LocalDateTime startTime, Duration duration);
 
-    boolean updateEpic(Epic epic);
+    void updateEpic(Epic epic);
 
     boolean updateTask(Task task);
 

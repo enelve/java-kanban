@@ -1,0 +1,9 @@
+id,type,name,status,description,start time,duration,end time, epic,
+2,TASK,Task1,NEW,Description Task1,2020-01-01T01:01:01,1200,,
+4,TASK,Task2,NEW,Description Task2,2020-01-01T01:01:01,1200,,
+1,EPIC,Epic1,NEW,Description Epic1,2020-01-01T01:01:01,1200,2020-01-01T01:01:01,
+5,EPIC,Epic2,NEW,Description Epic2,,0,,
+3,SUBTASK,SubTask1,NEW,Description SubTask1,2020-01-01T01:01:01,1200,,1
+6,SUBTASK,SubTask2,NEW,Description SubTask2,2020-01-01T01:01:01,1200,,1
+
+5,4,2,6
