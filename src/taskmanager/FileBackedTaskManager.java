@@ -3,11 +3,13 @@ package taskmanager;
 import exception.ManagerSaveException;
 import exception.TaskParsingFromStringException;
 import historymanager.HistoryManager;
-import tasktype.Epic;
-import tasktype.SubTask;
-import tasktype.Task;
+import task.Epic;
+import task.SubTask;
+import task.Task;
 
 import java.io.*;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -29,11 +31,15 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         FileBackedTaskManager manager1 = new FileBackedTaskManager(Managers.getDefaultHistory(),
                 new File("tasks-storage.csv"));
         manager1.createEpic("Epic1", "Description Epic1");
-        manager1.createTask("Task1", "Description Task1", "NEW");
-        manager1.createSubTask("SubTask1", "Description SubTask1", "NEW", 1);
-        manager1.createTask("Task2", "Description Task2", "NEW");
+        manager1.createTask("Task1", "Description Task1", "NEW",
+                LocalDateTime.of(2020, 1, 1, 1, 1, 1), Duration.ofHours(20));
+        manager1.createSubTask("SubTask1", "Description SubTask1", "NEW",
+                LocalDateTime.of(2020, 1, 1, 1, 1, 1), Duration.ofHours(20), 1);
+        manager1.createTask("Task2", "Description Task2", "NEW",
+                LocalDateTime.of(2020, 1, 1, 1, 1, 1), Duration.ofHours(20));
         manager1.createEpic("Epic2", "Description Epic2");
-        manager1.createSubTask("SubTask2", "Description SubTask2", "NEW", 1);
+        manager1.createSubTask("SubTask2", "Description SubTask2", "NEW",
+                LocalDateTime.of(2020, 1, 1, 1, 1, 1), Duration.ofHours(20), 1);
         manager1.getTask(4);
         manager1.getEpic(5);
         manager1.getTask(4);
@@ -115,15 +121,18 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     @Override
-    public void createSubTask(String name, String description, String status, int epicId) {
-        super.createSubTask(name, description, status, epicId);
+    public boolean createSubTask(String name, String description, String status, LocalDateTime startTime,
+                                 Duration duration, int epicId) {
+        boolean hasTimeConfict = super.createSubTask(name, description, status, startTime, duration, epicId);
         save();
+        return hasTimeConfict;
     }
 
     @Override
-    public void createTask(String name, String description, String status) {
-        super.createTask(name, description, status);
+    public boolean createTask(String name, String description, String status, LocalDateTime startTime, Duration duration) {
+        boolean hasTimeConfict = super.createTask(name, description, status, startTime, duration);
         save();
+        return hasTimeConfict;
     }
 
     @Override
@@ -133,15 +142,17 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     @Override
-    public void updateTask(Task task) {
-        super.updateTask(task);
+    public boolean updateTask(Task task) {
+        boolean hasTimeConfict = super.updateTask(task);
         save();
+        return hasTimeConfict;
     }
 
     @Override
-    public void updateSubTask(SubTask subTask) {
-        super.updateSubTask(subTask);
+    public boolean updateSubTask(SubTask subTask) {
+        boolean hasTimeConfict = super.updateSubTask(subTask);
         save();
+        return hasTimeConfict;
     }
 
     @Override
@@ -224,13 +235,10 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     private void save() {
         try (Writer fileWriter = new FileWriter(file)) {
-            String header = "id,type,name,status,description,epic";
+            String header = "id,type,name,status,description,start time,duration,end time, epic,";
             String nextLine = "\n";
             fileWriter.write(header + nextLine);
-            List<Task> taskList = new LinkedList<>();
-            taskList.addAll(super.getTasks());
-            taskList.addAll(super.getEpics());
-            taskList.addAll(super.getSubTasks());
+            List<Task> taskList = super.getAll();
             for (Task task : taskList) {
                 fileWriter.write(task.toString() + nextLine);
             }

@@ -1,23 +1,27 @@
 package taskmanager;
 
-import tasktype.Epic;
-import tasktype.SubTask;
-import tasktype.Task;
+import task.Epic;
+import task.SubTask;
+import task.Task;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 public interface TaskManager {
     void createEpic(String name, String description);
 
-    void createSubTask(String name, String description, String status, int epicId);
+    boolean createSubTask(String name, String description, String status, LocalDateTime startTime,
+                          Duration duration, int epicId);
 
-    void createTask(String name, String description, String status);
+    boolean createTask(String name, String description, String status, LocalDateTime startTime, Duration duration);
 
     void updateEpic(Epic epic);
 
-    void updateTask(Task task);
+    boolean updateTask(Task task);
 
-    void updateSubTask(SubTask subTask);
+    boolean updateSubTask(SubTask subTask);
 
     Task getTask(int id);
 
@@ -39,6 +43,8 @@ public interface TaskManager {
 
     List<Epic> getEpics();
 
+    List<Task> getAll();
+
     List<SubTask> getEpicSubtasks(int id);
 
     void clearTasks();
@@ -46,4 +52,6 @@ public interface TaskManager {
     void clearSubTasks();
 
     void clearEpics();
+
+    Set<Task> getPrioritizedTasks();
 }
