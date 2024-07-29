@@ -1,9 +1,9 @@
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import hander.util.JsonMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.testng.shaded.com.google.gson.reflect.TypeToken;
 import task.Epic;
 import task.SubTask;
 import task.Task;
@@ -11,14 +11,12 @@ import taskmanager.Managers;
 import taskmanager.TaskManager;
 
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -31,6 +29,15 @@ class HttpTaskServerTest {
     HttpTaskServer httpTaskServer;
     HttpClient client;
     Gson jsonMapper;
+
+    class SubTaskTypeToken extends TypeToken<List<SubTask>> {
+    }
+
+    class TaskTypeToken extends TypeToken<List<Task>> {
+    }
+
+    class EpicTypeToken extends TypeToken<List<Epic>> {
+    }
 
     @BeforeEach
     void BeforeEach() throws IOException {
@@ -55,9 +62,7 @@ class HttpTaskServerTest {
         URI url = URI.create("http://localhost:" + TEST_DEFAULT_HTTP_PORT + "/tasks");
         HttpRequest request = HttpRequest.newBuilder().uri(url).GET().build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        Type listType = new TypeToken<ArrayList<Task>>() {
-        }.getType();
-        assertEquals(manager.getTasks(), jsonMapper.fromJson(response.body(), listType));
+        assertEquals(manager.getTasks(), jsonMapper.fromJson(response.body(), new TaskTypeToken().getType()));
     }
 
     @Test
@@ -94,7 +99,10 @@ class HttpTaskServerTest {
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         assertEquals(201, response.statusCode());
         Task actual = manager.getTasks().get(0);
-        assertThat(actual).usingRecursiveComparison().ignoringFields("id").isEqualTo(newTask);
+        assertEquals(actual.getName(), newTask.getName());
+        assertEquals(actual.getDuration(), newTask.getDuration());
+        assertEquals(actual.getStartTime(), newTask.getStartTime());
+        assertEquals(actual.getDescription(), newTask.getDescription());
     }
 
     @Test
@@ -112,7 +120,10 @@ class HttpTaskServerTest {
         assertEquals(201, response.statusCode());
 
         Task task = manager.getTasks().get(0);
-        assertThat(task).usingRecursiveComparison().isEqualTo(modifiedTask);
+        assertEquals(task.getName(), modifiedTask.getName());
+        assertEquals(task.getDuration(), modifiedTask.getDuration());
+        assertEquals(task.getStartTime(), modifiedTask.getStartTime());
+        assertEquals(task.getDescription(), modifiedTask.getDescription());
     }
 
     @Test
@@ -149,9 +160,7 @@ class HttpTaskServerTest {
         URI url = URI.create("http://localhost:" + TEST_DEFAULT_HTTP_PORT + "/subtasks");
         HttpRequest request = HttpRequest.newBuilder().uri(url).GET().build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        Type listType = new TypeToken<ArrayList<SubTask>>() {
-        }.getType();
-        assertEquals(manager.getSubTasks(), jsonMapper.fromJson(response.body(), listType));
+        assertEquals(manager.getSubTasks(), jsonMapper.fromJson(response.body(), new SubTaskTypeToken().getType()));
     }
 
     @Test
@@ -194,7 +203,10 @@ class HttpTaskServerTest {
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         assertEquals(201, response.statusCode());
         Task actual = manager.getSubTasks().get(0);
-        assertThat(actual).usingRecursiveComparison().ignoringFields("id").isEqualTo(newSubTask);
+        assertEquals(actual.getName(), newSubTask.getName());
+        assertEquals(actual.getDuration(), newSubTask.getDuration());
+        assertEquals(actual.getStartTime(), newSubTask.getStartTime());
+        assertEquals(actual.getDescription(), newSubTask.getDescription());
     }
 
     @Test
@@ -212,7 +224,10 @@ class HttpTaskServerTest {
         assertEquals(201, response.statusCode());
 
         Task subTask = manager.getSubTasks().get(0);
-        assertThat(subTask).usingRecursiveComparison().isEqualTo(modifiedSubTask);
+        assertEquals(subTask.getName(), modifiedSubTask.getName());
+        assertEquals(subTask.getDuration(), modifiedSubTask.getDuration());
+        assertEquals(subTask.getStartTime(), modifiedSubTask.getStartTime());
+        assertEquals(subTask.getDescription(), modifiedSubTask.getDescription());
     }
 
     @Test
@@ -233,9 +248,7 @@ class HttpTaskServerTest {
         URI url = URI.create("http://localhost:" + TEST_DEFAULT_HTTP_PORT + "/epics");
         HttpRequest request = HttpRequest.newBuilder().uri(url).GET().build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        Type listType = new com.google.gson.reflect.TypeToken<ArrayList<Epic>>() {
-        }.getType();
-        assertEquals(manager.getEpics(), jsonMapper.fromJson(response.body(), listType));
+        assertEquals(manager.getEpics(), jsonMapper.fromJson(response.body(), new EpicTypeToken().getType()));
     }
 
     @Test
@@ -257,9 +270,7 @@ class HttpTaskServerTest {
         URI url = URI.create("http://localhost:" + TEST_DEFAULT_HTTP_PORT + "/epics/subtasks?id=" + 1);
         HttpRequest request = HttpRequest.newBuilder().uri(url).GET().build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        Type listType = new TypeToken<ArrayList<SubTask>>() {
-        }.getType();
-        assertEquals(manager.getEpicSubtasks(1), jsonMapper.fromJson(response.body(), listType));
+        assertEquals(manager.getEpicSubtasks(1), jsonMapper.fromJson(response.body(), new SubTaskTypeToken().getType()));
     }
 
     @Test
@@ -271,8 +282,10 @@ class HttpTaskServerTest {
                 .build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         assertEquals(response.statusCode(), 201);
-        assertThat(newEpic).usingRecursiveComparison().ignoringFields("id")
-                .isEqualTo(manager.getEpic(1));
+        assertEquals(newEpic.getName(), manager.getEpic(1).getName());
+        assertEquals(newEpic.getDuration(), manager.getEpic(1).getDuration());
+        assertEquals(newEpic.getStartTime(), manager.getEpic(1).getStartTime());
+        assertEquals(newEpic.getDescription(), manager.getEpic(1).getDescription());
     }
 
     @Test
@@ -292,10 +305,8 @@ class HttpTaskServerTest {
         URI url = URI.create("http://localhost:" + TEST_DEFAULT_HTTP_PORT + "/prioritized");
         HttpRequest request = HttpRequest.newBuilder().uri(url).GET().build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        Type listType = new com.google.gson.reflect.TypeToken<ArrayList<Task>>() {
-        }.getType();
         List<Task> expected = manager.getPrioritizedTasks().stream().toList();
-        List<Task> actual = jsonMapper.fromJson(response.body(), listType);
+        List<Task> actual = jsonMapper.fromJson(response.body(), new TaskTypeToken().getType());
         assertEquals(expected, actual);
     }
 
@@ -305,9 +316,7 @@ class HttpTaskServerTest {
         URI url = URI.create("http://localhost:" + TEST_DEFAULT_HTTP_PORT + "/history");
         HttpRequest request = HttpRequest.newBuilder().uri(url).GET().build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        Type listType = new com.google.gson.reflect.TypeToken<ArrayList<Task>>() {
-        }.getType();
-        assertEquals(manager.getHistory(), jsonMapper.fromJson(response.body(), listType));
+        assertEquals(manager.getHistory(), jsonMapper.fromJson(response.body(), new TaskTypeToken().getType()));
     }
 
     private void prepareData() {
