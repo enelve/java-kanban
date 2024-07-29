@@ -68,7 +68,7 @@ public class SubTaskHandler extends BaseHttpHandler implements HttpHandler {
         boolean hasTimeConfict = (subTask.getId() == 0)
                 ? manager.createSubTask(subTask.getName(), subTask.getDescription(), subTask.getStatus().name(),
                 subTask.getStartTime(), subTask.getDuration(), subTask.getEpicId())
-                : manager.updateTask(subTask);
+                : manager.updateSubTask(subTask);
         if (hasTimeConfict) {
             throw new TimeConflictException(TIME_CONFLICT_MESSAGE);
         } else {

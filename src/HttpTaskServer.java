@@ -32,11 +32,11 @@ public class HttpTaskServer {
 
     }
 
-    public void stopHttpServer() {
+    protected void stopHttpServer() {
         this.httpServer.stop(0);
     }
 
-    private void startHttpServer() {
+    protected void startHttpServer() {
         httpServer.createContext("/tasks", new TaskHandler(manager));
         httpServer.createContext("/subtasks", new SubTaskHandler(manager));
         httpServer.createContext("/epics", new EpicHandler(manager));

@@ -60,6 +60,7 @@
     </orderEntry>
     <orderEntry type="library" name="testng.remote" level="project" />
     <orderEntry type="library" name="gson-2.11.0" level="project" />
+    <orderEntry type="library" name="assertj-core-3.26.0" level="project" />
   </component>
   <component name="SonarLintModuleSettings">
     <option name="uniqueId" value="e745065b-1a9c-49aa-be98-6b5b39bcadf6" />

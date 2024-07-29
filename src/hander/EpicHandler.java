@@ -23,7 +23,7 @@ public class EpicHandler extends BaseHttpHandler implements HttpHandler {
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         try {
-                UserRequest userRequest = parseUserRequest(exchange);
+            UserRequest userRequest = parseUserRequest(exchange);
             switch (userRequest.type()) {
                 case POST -> handlePut(exchange);
                 case DELETE -> handleDelete(exchange, userRequest);

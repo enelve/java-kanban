@@ -1,7 +1,7 @@
 package taskmanager;
 
 import historymanager.InMemoryHistoryManager;
-import org.junit.jupiter.api.Assertions;
+import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -12,8 +12,10 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
-    private static String testFilePath = "resource/test-tasks-storage.csv";
+    private static final String testFilePath = "resource/test-tasks-storage.csv";
 
     @BeforeEach
     void init() {
@@ -40,26 +42,40 @@ class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
 
         File fileActual = new File(testFilePath);
         File fileExpected = new File("resource/expected_tasks-storage.csv");
-        Assertions.assertEquals(-1, filesCompareByByte(fileExpected, fileActual));
+        assertTrue(compare(fileExpected, fileActual));
     }
 
-    private long filesCompareByByte(File file1, File file2) throws IOException {
-        try (BufferedReader fis1 = new BufferedReader(new FileReader(file1));
-             BufferedReader fis2 = new BufferedReader(new FileReader(file2))) {
-
-            int ch = 0;
-            long pos = 1;
-            while ((ch = fis1.read()) != -1) {
-                if (ch != fis2.read()) {
-                    return pos;
-                }
-                pos++;
+    private boolean compare(File file1, File file2) throws IOException {
+        boolean result;
+        BufferedReader reader1 = new BufferedReader(new FileReader(file1));
+        BufferedReader reader2 = new BufferedReader(new FileReader(file2));
+        String line1 = reader1.readLine();
+        String line2 = reader2.readLine();
+        int lineNum = 1;
+        boolean areEqual = true;
+        while (line1 != null || line2 != null) {
+            if (line1 == null || line2 == null) {
+                areEqual = false;
+                break;
+            } else if (!line1.equalsIgnoreCase(line2)) {
+                areEqual = false;
+                break;
             }
-            if (fis2.read() == -1) {
-                return -1;
-            } else {
-                return pos;
-            }
+            line1 = reader1.readLine();
+            line2 = reader2.readLine();
+            lineNum++;
         }
+        if (areEqual) {
+            result = true;
+            System.out.println("Both the files have same content");
+        } else {
+            result = false;
+            System.out.println("Both the files have different content");
+            System.out.println("In both files, there is a difference at line number: " + lineNum);
+            System.out.println("One file has " + line1 + " and another file has " + line2 + " at line " + lineNum);
+        }
+        reader1.close();
+        reader2.close();
+        return result;
     }
 }

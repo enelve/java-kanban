@@ -1,16 +1,14 @@
 package hander;
 
-import com.google.gson.*;
+import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
 import exception.BadRequestException;
+import hander.util.JsonMapper;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 public class BaseHttpHandler {
@@ -23,7 +21,7 @@ public class BaseHttpHandler {
     }
 
     public BaseHttpHandler() {
-        this.jsonMapper = getDefaultJsonMapper();
+        this.jsonMapper = JsonMapper.getDefaultJsonMapper();
     }
 
     protected static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
@@ -78,22 +76,5 @@ public class BaseHttpHandler {
         } catch (NumberFormatException e) {
             throw new BadRequestException("Некорректно задан ID сделки - ожидается целое число");
         }
-    }
-
-    protected Gson getDefaultJsonMapper() {
-        return new GsonBuilder()
-                .registerTypeAdapter(LocalDateTime.class, (JsonSerializer<LocalDateTime>) (value, type, context) ->
-                        new JsonPrimitive(value.format(DateTimeFormatter.ISO_DATE_TIME))
-                )
-                .registerTypeAdapter(LocalDateTime.class, (JsonDeserializer<LocalDateTime>) (jsonElement, type, context) ->
-                        LocalDateTime.parse(jsonElement.getAsJsonPrimitive().getAsString(), DateTimeFormatter.ISO_DATE_TIME)
-                )
-                .registerTypeAdapter(Duration.class, (JsonSerializer<Duration>) (value, type, context) ->
-                        new JsonPrimitive(value.toMinutes())
-                )
-                .registerTypeAdapter(Duration.class, (JsonDeserializer<Duration>) (jsonElement, type, context) ->
-                        Duration.ofMinutes(jsonElement.getAsJsonPrimitive().getAsInt())
-                )
-                .create();
     }
 }
