@@ -85,7 +85,7 @@ public class InMemoryTaskManager implements TaskManager {
         if (epics.containsKey(subTask.getEpicId()) && subTasks.containsKey(subTask.getId())) {
             SubTask oldVersion = getSubTask(subTask.getId());
             newVersion = new SubTask(oldVersion.getId(), subTask.getName(), subTask.getDescription(),
-                    subTask.getStatus().name(), oldVersion.getStartTime(), oldVersion.getDuration(), oldVersion.getEpicId());
+                    subTask.getStatus().name(), subTask.getStartTime(), subTask.getDuration(), subTask.getEpicId());
             subTasks.put(newVersion.getId(), newVersion);
             updateParentEpic(newVersion.getEpicId());
         }
